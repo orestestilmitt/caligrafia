@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Análisis caligráfico</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="container">
+	<div id="mainmodule">
+  <h1>Sube tus imágenes</h1>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <div class="modulo">
+      <h3>Imagen de control</h3>
+      <label for="image1" class="custom-file-upload"> <i>📂</i> Seleccionar imagen </label>
+      <input type="file" name="image1" id="image1" accept="image/*" required onchange="previewImage(event, 'preview1', 'file-name1')">
+      <p id="file-name1" class="file-name">No se ha seleccionado ninguna imagen.</p>
+    </div>
+    <div class="modulo">
+      <h3>Imagen de prueba</h3>
+      <label for="image2" class="custom-file-upload"> <i>📂</i> Seleccionar imagen </label>
+      <input type="file" name="image2" id="image2" accept="image/*" required onchange="previewImage(event, 'preview2', 'file-name2')">
+      <p id="file-name2" class="file-name">No se ha seleccionado ninguna imagen.</p>
+    </div>
+    <div class="preview">
+      <div id="preview1">
+        <p>No se ha seleccionado ninguna imagen.</p>
+      </div>
+      <div id="preview2">
+        <p>No se ha seleccionado ninguna imagen.</p>
+      </div>
+    </div>
+    
+    <!-- Checkbox de confirmación -->
+    <div class="check">
+      <input type="checkbox" id="termsCheckbox" onchange="checkConditions()">
+      <label for="termsCheckbox">He leído los términos y condiciones y he anonimizado las imágenes.</label>
+    </div>
+    <button type="submit" id="submitBtn" disabled>Analiza</button>
+  </form>
+		</div>
+  
+  <!-- Sección de Resultados -->
+  <div id="result">
+    <h1>Resultado</h1>
+    <div id="analysisText"></div>
+	  <div id="warning"><p>Esta información no constituye un diagnóstico psicológico y ha sido generada por una inteligencia artificial. Si sospechas que tu o alguien cercano puede estar experimentando un trastorno psicológico, te recomendamos consultar a un profesional de la salud mental.</p></div>
+    <button onclick="resetForm()">Analiza una nueva muestra</button>
+  </div>
+</div>
+
+<!-- MODAL DE CARGA -->
+<div id="loadingModal" class="modal">
+  <div class="modal-content">
+    <p>🔍 Analizando la escritura...</p>
+    <div class="spinner"></div>
+  </div>
+</div>
+<script>
+function previewImage(event, previewId, fileNameId) {
+  const file = event.target.files[0];
+  const previewContainer = document.getElementById(previewId);
+  const fileNameDisplay = document.getElementById(fileNameId);
+
+  previewContainer.innerHTML = ''; // Limpiar la vista previa
+
+  if (file) {
+    // Actualizar el nombre del archivo
+    fileNameDisplay.textContent = file.name;
+
+    // Crear y mostrar la imagen en miniatura
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(file);
+    img.alt = 'Vista previa';
+    previewContainer.appendChild(img);
+  } else {
+    fileNameDisplay.textContent = "No se ha seleccionado ninguna imagen.";
+    previewContainer.innerHTML = '<p>No se ha seleccionado ninguna imagen.</p>';
+  }
+
+  checkConditions(); // Verificar si ambas imágenes están listas y si el checkbox está marcado
+}
+
+function checkConditions() {
+  const image1 = document.getElementById("image1").files.length > 0;
+  const image2 = document.getElementById("image2").files.length > 0;
+  const termsChecked = document.getElementById("termsCheckbox").checked;
+  const submitBtn = document.getElementById("submitBtn");
+
+  if (image1 && image2 && termsChecked) {
+    submitBtn.disabled = false;
+  } else {
+    submitBtn.disabled = true;
+  }
+}
+
+document.getElementById("uploadForm").addEventListener("submit", async function(event) {
+  event.preventDefault(); // Evitar recarga de la página
+
+  document.getElementById("loadingModal").style.display = "flex";
+
+  const formData = new FormData();
+  formData.append("image1", document.getElementById("image1").files[0]);
+  formData.append("image2", document.getElementById("image2").files[0]);
+
+  try {
+    const response = await fetch("/upload", {
+      method: "POST",
+      body: formData
+    });
+
+    const result = await response.text();
+    
+    document.getElementById("loadingModal").style.display = "none";
+    
+    // Ocultar el formulario principal y mostrar el resultado
+    document.getElementById("mainmodule").style.display = "none";
+    document.getElementById("result").style.display = "block";
+    
+    document.getElementById("analysisText").innerHTML = result;
+  } catch (error) {
+    document.getElementById("loadingModal").style.display = "none";
+    alert("Hubo un error al procesar la tarea.");
+  }
+});
+
+function resetForm() {
+  document.getElementById("uploadForm").reset();
+  document.getElementById("submitBtn").disabled = true;
+
+  document.getElementById("preview1").innerHTML = "<p>No se ha seleccionado ninguna imagen.</p>";
+  document.getElementById("preview2").innerHTML = "<p>No se ha seleccionado ninguna imagen.</p>";
+
+  document.getElementById("file-name1").textContent = "No se ha seleccionado ninguna imagen.";
+  document.getElementById("file-name2").textContent = "No se ha seleccionado ninguna imagen.";
+
+  // Mostrar el formulario y ocultar el resultado
+  document.getElementById("mainmodule").style.display = "block";
+  document.getElementById("result").style.display = "none";
+}
+
+// Asegurar que el botón se actualiza al recargar la página
+window.onload = function() {
+  checkConditions();
+};
+
+  </script>
+</body>
+</html>
