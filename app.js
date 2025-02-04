@@ -15,7 +15,9 @@ const openai = new OpenAI({
 
 // Initialize Express app
 const app = express();
-const PORT = 3000;
+
+// Use the port provided by Render or default to 3000
+const PORT = process.env.PORT || 3000;
 
 // Serve static files (frontend)
 app.use(express.static("public"));
@@ -61,7 +63,6 @@ app.post("/upload", upload.fields([{ name: "image1" }, { name: "image2" }]), asy
         // Send response back to client
         res.send(`
             <div id="AIresponse">${convertirTextoAHTML(response.choices[0].message.content)}</div>
-            
         `);
     } catch (error) {
         console.error("Error:", error.message);
