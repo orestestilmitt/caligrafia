@@ -15,9 +15,7 @@ const openai = new OpenAI({
 
 // Initialize Express app
 const app = express();
-
-// Use the port provided by Render or default to 3000
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000; // Use the PORT provided by Render or fallback to 3000
 
 // Serve static files (frontend)
 app.use(express.static("public"));
@@ -47,7 +45,7 @@ app.post("/upload", upload.fields([{ name: "image1" }, { name: "image2" }]), asy
                 {
                     role: "user",
                     content: [
-                        { type: "text", text: "Please analyze and compare these two handwriting samples from the same person but in different moments and look for psychological insights and differences in personality traits or emotional states. Provide any possible psychological interpretations. Give me the answer in spanish." }, //Stress, Anxiety, Depression, Aggressiveness and Impulsivity, Insecurity or Low Self-Esteem, Manipulation or Deception, Organization and Discipline and Neurological or Cognitive Problems (only those relevant) //the first image is the control sample, the second is a recent sample
+                        { type: "text", text: "Please analyze and compare these two handwriting samples from the same person but in different moments and look for psychological insights and differences in personality traits or emotional states. Provide any possible psychological interpretations. Give me the answer in spanish." }, 
                         { type: "image_url", image_url: { url: `data:image/jpeg;base64,${image1Base64}` } },
                         { type: "image_url", image_url: { url: `data:image/jpeg;base64,${image2Base64}` } },
                     ],
@@ -72,7 +70,7 @@ app.post("/upload", upload.fields([{ name: "image1" }, { name: "image2" }]), asy
 
 // Start the server
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
 
 // Convertir texto a HTML
